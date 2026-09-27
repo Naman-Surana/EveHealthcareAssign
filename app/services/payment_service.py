@@ -28,10 +28,6 @@ class PaymentService:
             await self.db.rollback()
             raise DomainException(code=Strings.CODE_NOT_OWNER, message=Strings.ERR_NOT_OWNER, status_code=status.HTTP_403_FORBIDDEN)
             
-        if booking.status != Strings.STATUS_PENDING:
-            await self.db.rollback()
-            raise DomainException(code=Strings.CODE_BOOKING_NOT_PAYABLE, message=Strings.ERR_BOOKING_NOT_PAYABLE, status_code=status.HTTP_409_CONFLICT, details={"current_status": booking.status})
-            
         idemp_key = data.idempotency_key or f"booking:{data.booking_id}:init"
         
         existing_result = await self.db.execute(select(Payment).where(Payment.idempotency_key == idemp_key))
@@ -41,6 +37,11 @@ class PaymentService:
             fresh_payment = await self.db.scalar(select(Payment).where(Payment.id == existing_payment.id))
             fresh_booking = await self.db.scalar(select(Booking).where(Booking.id == booking.id))
             return fresh_payment, fresh_booking
+            
+        if booking.status != Strings.STATUS_PENDING:
+            current_status = booking.status
+            await self.db.rollback()
+            raise DomainException(code=Strings.CODE_BOOKING_NOT_PAYABLE, message=Strings.ERR_BOOKING_NOT_PAYABLE, status_code=status.HTTP_409_CONFLICT, details={"current_status": current_status})
             
         payment = Payment(
             booking_id=booking.id,
