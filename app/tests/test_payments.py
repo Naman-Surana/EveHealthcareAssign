@@ -35,11 +35,12 @@ async def setup_booking(db_session: AsyncSession, test_user: User):
     return booking
 
 async def test_initiate_payment_success(async_client: AsyncClient, auth_headers: dict, setup_booking: Booking):
+    booking_id = str(setup_booking.id)
     response = await async_client.post(
         "/api/v1/payments/",
         headers=auth_headers,
         json={
-            "booking_id": str(setup_booking.id),
+            "booking_id": booking_id,
             "force_outcome": Strings.STATUS_SUCCESS
         }
     )
@@ -49,13 +50,14 @@ async def test_initiate_payment_success(async_client: AsyncClient, auth_headers:
     assert data["booking"]["status"] == Strings.STATUS_CONFIRMED
 
 async def test_idempotent_payment_initiation(async_client: AsyncClient, auth_headers: dict, setup_booking: Booking):
+    booking_id = str(setup_booking.id)
     # First request
     idemp_key = "test_key_123"
     response1 = await async_client.post(
         "/api/v1/payments/",
         headers=auth_headers,
         json={
-            "booking_id": str(setup_booking.id),
+            "booking_id": booking_id,
             "idempotency_key": idemp_key,
             "force_outcome": Strings.STATUS_SUCCESS
         }
@@ -67,7 +69,7 @@ async def test_idempotent_payment_initiation(async_client: AsyncClient, auth_hea
         "/api/v1/payments/",
         headers=auth_headers,
         json={
-            "booking_id": str(setup_booking.id),
+            "booking_id": booking_id,
             "idempotency_key": idemp_key,
             "force_outcome": Strings.STATUS_FAILED
         }
