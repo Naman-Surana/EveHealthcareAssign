@@ -38,9 +38,9 @@ class PaymentService:
         existing_payment = existing_result.scalars().first()
         if existing_payment:
             await self.db.commit()
-            await self.db.refresh(existing_payment)
-            await self.db.refresh(booking)
-            return existing_payment, booking
+            fresh_payment = await self.db.scalar(select(Payment).where(Payment.id == existing_payment.id))
+            fresh_booking = await self.db.scalar(select(Booking).where(Booking.id == booking.id))
+            return fresh_payment, fresh_booking
             
         payment = Payment(
             booking_id=booking.id,
@@ -63,7 +63,7 @@ class PaymentService:
         booking.status = Strings.STATUS_CONFIRMED if outcome == Strings.STATUS_SUCCESS else Strings.STATUS_FAILED
         
         await self.db.commit()
-        await self.db.refresh(payment)
-        await self.db.refresh(booking)
+        fresh_payment = await self.db.scalar(select(Payment).where(Payment.id == payment.id))
+        fresh_booking = await self.db.scalar(select(Booking).where(Booking.id == booking.id))
         
-        return payment, booking
+        return fresh_payment, fresh_booking
