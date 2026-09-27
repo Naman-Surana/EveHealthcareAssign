@@ -12,3 +12,4 @@ httpx
 structlog
 email-validator
 gunicorn
+aiosqlite
