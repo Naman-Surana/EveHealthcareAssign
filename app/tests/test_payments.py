@@ -1,4 +1,5 @@
 import pytest
+import pytest_asyncio
 from httpx import AsyncClient
 from app.models.user import User
 from app.models.booking import Booking
@@ -9,12 +10,12 @@ from datetime import datetime, timedelta, timezone
 
 pytestmark = pytest.mark.asyncio
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def auth_headers(test_user: User):
     token = create_access_token(str(test_user.id), test_user.role)
     return {"Authorization": f"Bearer {token}"}
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def setup_booking(db_session: AsyncSession, test_user: User):
     import uuid
     dummy_centre_id = uuid.uuid4()

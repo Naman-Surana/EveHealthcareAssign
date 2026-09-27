@@ -1,4 +1,5 @@
 import pytest
+import pytest_asyncio
 from httpx import AsyncClient
 from app.models.user import User
 from app.models.centre import DiagnosticCentre
@@ -10,12 +11,12 @@ from datetime import datetime, timedelta, timezone
 
 pytestmark = pytest.mark.asyncio
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def auth_headers(test_user: User):
     token = create_access_token(str(test_user.id), test_user.role)
     return {"Authorization": f"Bearer {token}"}
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def setup_test_data(db_session: AsyncSession):
     centre = DiagnosticCentre(name="Test Centre", address="123 St", city="Test City")
     db_session.add(centre)

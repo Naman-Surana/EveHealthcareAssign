@@ -1,4 +1,5 @@
 import pytest
+import pytest_asyncio
 from httpx import AsyncClient
 from app.models.payment import Payment
 from app.models.booking import Booking
@@ -13,7 +14,7 @@ from datetime import datetime, timezone
 
 pytestmark = pytest.mark.asyncio
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def setup_payment(db_session: AsyncSession):
     dummy_booking = Booking(
         user_id=uuid.uuid4(),

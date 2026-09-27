@@ -1,4 +1,5 @@
 import pytest
+import pytest_asyncio
 from httpx import AsyncClient
 from app.models.user import User
 from app.core.strings import Strings
@@ -7,7 +8,7 @@ import uuid
 
 pytestmark = pytest.mark.asyncio
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def auth_headers(test_user: User):
     token = create_access_token(str(test_user.id), test_user.role)
     return {"Authorization": f"Bearer {token}"}
