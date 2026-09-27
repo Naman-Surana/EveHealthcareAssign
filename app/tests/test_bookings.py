@@ -47,7 +47,7 @@ async def test_create_booking_success(async_client: AsyncClient, auth_headers: d
     assert response.status_code == 201
     data = response.json()
     assert data["status"] == Strings.STATUS_PENDING
-    assert data["amount"] == "500.0"
+    assert float(data["amount"]) == 500.0
 
 async def test_create_booking_past_date(async_client: AsyncClient, auth_headers: dict, setup_test_data: dict):
     past_date = (datetime.now(timezone.utc) - timedelta(days=2)).isoformat()

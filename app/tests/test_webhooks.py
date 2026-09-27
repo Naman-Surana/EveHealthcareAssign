@@ -59,27 +59,31 @@ async def test_webhook_success(async_client: AsyncClient, setup_payment: dict):
         "occurred_at": datetime.now(timezone.utc).isoformat()
     }
     
-    signature = generate_signature(payload)
+    body = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode()
+    signature = hmac.new(settings.WEBHOOK_SIGNING_SECRET.encode(), body, hashlib.sha256).hexdigest()
     
     response = await async_client.post(
         "/api/v1/payments/webhook/",
-        headers={"X-Webhook-Signature": signature},
-        json=payload
+        headers={"X-Webhook-Signature": signature, "Content-Type": "application/json"},
+        content=body
     )
     
     assert response.status_code == 200
 
 async def test_webhook_invalid_signature(async_client: AsyncClient):
+    payload = {
+        "event_id": "evt_12345",
+        "payment_id": str(uuid.uuid4()),
+        "booking_id": str(uuid.uuid4()),
+        "status": Strings.STATUS_SUCCESS,
+        "occurred_at": datetime.now(timezone.utc).isoformat()
+    }
+    body = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode()
+    
     response = await async_client.post(
         "/api/v1/payments/webhook/",
-        headers={"X-Webhook-Signature": "invalid_signature"},
-        json={
-            "event_id": "evt_12345",
-            "payment_id": str(uuid.uuid4()),
-            "booking_id": str(uuid.uuid4()),
-            "status": Strings.STATUS_SUCCESS,
-            "occurred_at": datetime.now(timezone.utc).isoformat()
-        }
+        headers={"X-Webhook-Signature": "invalid_signature", "Content-Type": "application/json"},
+        content=body
     )
     
     assert response.status_code == 401

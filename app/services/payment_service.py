@@ -38,6 +38,8 @@ class PaymentService:
         existing_payment = existing_result.scalars().first()
         if existing_payment:
             await self.db.commit()
+            await self.db.refresh(existing_payment)
+            await self.db.refresh(booking)
             return existing_payment, booking
             
         payment = Payment(
