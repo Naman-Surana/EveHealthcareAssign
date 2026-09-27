@@ -1,15 +1,14 @@
 from sqlalchemy import Column, String, DateTime, ForeignKey, Numeric, Index
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
-from app.core.database import Base
+from app.core.database import Base, GUID
 from app.core.strings import Strings
 import uuid
 
 class Payment(Base):
     __tablename__ = "payments"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    booking_id = Column(UUID(as_uuid=True), ForeignKey("bookings.id"), nullable=False, index=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    booking_id = Column(GUID(), ForeignKey("bookings.id"), nullable=False, index=True)
     idempotency_key = Column(String(120), unique=True, nullable=False)
     amount = Column(Numeric(10, 2), nullable=False)
     status = Column(String(20), nullable=False, default=Strings.STATUS_PENDING)

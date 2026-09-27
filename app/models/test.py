@@ -1,14 +1,13 @@
 from sqlalchemy import Column, String, Text, DateTime, Boolean, ForeignKey, Numeric, Integer
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
-from app.core.database import Base
+from app.core.database import Base, GUID
 import uuid
 
 class DiagnosticTest(Base):
     __tablename__ = "diagnostic_tests"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    centre_id = Column(UUID(as_uuid=True), ForeignKey("diagnostic_centres.id"), nullable=False, index=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    centre_id = Column(GUID(), ForeignKey("diagnostic_centres.id"), nullable=False, index=True)
     name = Column(String(160), nullable=False)
     description = Column(Text, nullable=True)
     price = Column(Numeric(10, 2), nullable=False)
